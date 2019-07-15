@@ -1,0 +1,729 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{color}
+\renewcommand\qedsymbol{$\blacksquare$}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{observation}{Observation}
+\newtheorem{remark}{Remark}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{claim}{Claim}
+
+\usepackage{hyperref}
+\newcommand{\probref}[1]{Problem~\ref{#1}}
+\newcommand{\cororef}[1]{Corollary~\ref{#1}}
+\newcommand{\claimref}[1]{claim~\ref{#1}}
+\newcommand{\Lemmaref}[1]{Lemma~\ref{#1}}
+
+\newcommand{\x}{{\mathbf x}}
+\renewcommand{\u}{{\mathbf u}}
+\newcommand{\e}{{\mathbf e}}
+
+\newcommand{\norm}[1]{\left\Vert #1\right\Vert}
+\newcommand{\cO}{\mathcal{O}}
+\newcommand{\orth}[2]{\cO^{#1\times #2}}
+\newcommand{\mat}[2]{\R^{#1\times #2}}
+\newcommand{\R}{\mathbb{R}}
+
+\oddsidemargin=0.15in
+\evensidemargin=0.15in
+\topmargin=-.5in
+\textheight=9in
+\textwidth=6.25in
+
+\title{Orthogonal Case}
+\author{Gad Zalcberg}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+\subsubsection{Notation}
+\begin{itemize}
+    \item Denote $\orth{d}{r}$ the set of the matrices with $r$ orthonormal columns in $\R^d$.
+    \item I used upper case letters for matrices ($U,V$ for example), bold lower case letters for vectors ($\x,\e$ for example), and lower case letters for scalars (for example $x,e$)
+    \item I used pythonic notation for indices:
+    $U_{i:}$ for the $i$'th row, $U_{:j}$ for the $j$'th column, $U_{ij}$ for the $i,j$'th entry of matrix, and $\x_{i}$ for the $i$'th entry of vector.
+\end{itemize}
+
+\subsection{Problem definition - scaled standard basis}
+Given $\{\x_i\}_{i=1}^n\subset\R^d$, we now assume $n=d,\;\;\forall i\in[n]: \; \x_i=t_i\e_i$ ($t_i\in \mathbb{R},\; \e_i$ is the $i$'th element in the  standard basis) we are trying to solve:
+
+\begin{equation} \label{factorized_problem}
+\max_{\begin{array}{c}
+U\in\R^{d\times r}\\
+0\preceq UU^T\preceq I
+\end{array}}\min_{{i}}\x_{i}^{T}UU^T\x_{i}
+\end{equation}
+
+Observe that for any $U\in\mathcal{O}^{n\times r}$ (by \Lemmaref{local minimum orthogonal} the optimal solution is in this set) we get:
+\begin{align*}
+    \left\Vert \x_i-UU^T\x_i\right\Vert^2- \left\Vert \x_{i}\right\Vert ^{2}
+    =&\left\Vert \x_{i}\right\Vert^2-2\x_{i}^TUU^T\x_{i}+\x_{i}^TUU^TUU^T\x_{i}- \left\Vert \x_{i}\right\Vert^{2}\\
+    =&\left\Vert \x_{i}\right\Vert^2-2\x_{i}^TUU^T\x_{i}+\x_{i}^TUU^T\x_{i} - \left\Vert \x_{i}\right\Vert^{2}\\
+    =&-\x_{i}^TUU^T\x_{i} \\
+    =&\left\Vert \x_{i}\right\Vert^2\left(-\e_{i}^TUU^T\e_{i}\right) \\
+    =& -\left\Vert \x_{i}\right\Vert^2\left\Vert U_{i:}\right\Vert^2
+\end{align*}
+
+\textbf{For convenience, from now on, we use the following notation: 
+\begin{align*}
+    f_i(U)=&\left\Vert\x_{i}-UU^{T}\x_{i}\right\Vert^{2}-\left\Vert\x_{i}\right\Vert ^{2}\\
+    g(U)=&\max_if_i(U)
+\end{align*}
+}
+
+So we can solve equivalently:
+
+\begin{equation} \label{factorized_problem_restore}
+\min_{\begin{array}{c}
+U\in\mathbb{R}^{d\times r}
+\end{array}}\max_{i}\left\Vert \x_{i}-UU^T\x_{i}\right\Vert ^{2} - \left\Vert \x_{i}\right\Vert ^{2}=
+\min_{\begin{array}{c}
+U\in\mathbb{R}^{d\times r}
+\end{array}}g(U)
+\end{equation}
+
+
+\subsection{Any local minimum of $g$ is globally optimal}
+
+\begin{lemma} \label{not equal implies can improve}
+Let $U$ such that: $f_i(U)>f_j(U)$ for some $i\ne j$, then for any $\epsilon>0$ there exist $U_{\theta}$ such that:
+\begin{enumerate}
+    \item $\left\Vert U-U_{\theta}\right\Vert \le\epsilon$.
+    \item $f_j(U_{\theta})<f_i(U)$
+    \item $\forall k\in[n]\setminus\left\{ i,j\right\} :\qquad f_k(U)=f_k(U_{\theta})$.
+    \item $f_i(U_{\theta})<f_i(U)$
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+We will use Given Rotation in order to find $U_\theta$. Let $U$ as above. Define $R(\theta)$, a rotation matrix (for some $\theta$) over the $i,j$ axes, i.e.:
+$$
+R(\theta)_{lm}=\begin{cases}
+\cos\theta & lm=ii\quad or\quad lm=jj\\
+\sin\theta & lm=ij\\
+-\sin\theta & lm=ji\\
+I_{lm} & else
+\end{cases}
+$$
+and define $U_{\theta}=R(\theta)U$\\
+
+\textbf{1+2 is true, since:} 
+
+The functions $h\left(\theta\right)=U_{\theta},\quad g_j(\theta)=f_j(U_{\theta})$ are continuous functions, thus $\forall\epsilon\exists\delta$ such that $|\theta| \le\delta\Rightarrow$ 
+\begin{align*}
+  \left\Vert U_{\theta}- U\right\Vert = \left\Vert h(\theta)-h(0)\right\Vert& \le\epsilon  \\
+  \left|f_j(U)- f_j(U_{\theta})\right|=\left|g_j(\theta)-g_j(0)\right|\le\epsilon&\Rightarrow f_j(U_{\theta})<f_j(U) + \epsilon < f_i(U)
+\end{align*}
+
+
+\textbf{3 is true, since:} \\
+$\forall k\in[n]\setminus\left\{ i,j\right\} :\qquad \x_k=R(\theta)\x_k$. Thus:
+$$
+\left\Vert \x_{k}-U_{\theta}U_{\theta}^{T}\x_{k}\right\Vert^{2}=\left\Vert\x_{k}-R(\theta)UU^{T}R(\theta)^{T}\x_{k}\right\Vert^{2}=\left\Vert R(\theta)\x_{k}-R(\theta)UU^{T}\x_{k}\right\Vert^{2}=\left\Vert\x_{k}-UU^{T}\x_{k}\right\Vert^{2}
+$$
+
+\textbf{4 is true, since:} 
+
+Observe that\footnote{the proof of the last equation is in appendix \ref{technical proof}, since it is quite technical}:
+\begin{align*}
+    f_i(U_{\theta})-f_i(U)=&\left(\left\Vert\x_{i}-U_{\theta}U_{\theta}^{T}\x_{i}\right\Vert^{2}-\left\Vert\x_{i}\right\Vert^{2}\right)-\left(\left\Vert\x_{i}-UU^{T}\x_{i}\right\Vert^{2}-\left\Vert\x_{i}\right\Vert^{2}\right)\\
+    =&\left\Vert\x_{i}\right\Vert^{2}\left(\left\Vert\e_{i}-U_{\theta}U_{\theta}^{T}\e_{i}\right\Vert ^{2}-\left\Vert\e_{i}-UU^{T}\e_{i}\right\Vert^{2}\right)\\
+    =& \left\Vert\x_{i}\right\Vert^{2}\left(\sin\left(2\theta\right)\e_{i}^{T}UU^{T}\e_{j}^{T}+\sin\left(\theta\right)^{2}\left(\left\Vert\e_{j}-UU^{T}\e_{j}\right\Vert^{2}-\left\Vert\e_{i}-UU^{T}\e_{i}\right\Vert^{2}\right)\right)
+\end{align*}
+and $\sin\left(\theta\right)^{2}\left(\left\Vert\e_{j}-UU^{T}\e_{j}\right\Vert^{2}-\left\Vert\e_{i}-UU^{T}\e_{i}\right\Vert^{2}\right)<0$ for small $|\theta|$, so:
+\begin{itemize}
+    \item If: $\e_{i}^{T}UU^{T}\e_{j}^{T} \ge 0$ then for any $-\frac{\pi}{2}<\theta<0$:  $\sin\left(2\theta\right)\e_{i}^{T}UU^{T}\e_{j}^{T}<0$.
+    \item If: $\e_{i}^{T}UU^{T}\e_{j}^{T} < 0$ then for any $\frac{\pi}{2}>\theta>0$:  $\sin\left(2\theta\right)\e_{i}^{T}UU^{T}\e_{j}^{T}<0$.
+\end{itemize}
+i.e. we can pick arbitrarily small $|\theta|$ with $f_i(U_{\theta})-f_i(U)<0$.
+\end{proof}
+
+
+\begin{lemma} \label{local minimum equals}
+Let $U$ a local minimum of $g$, then for all $i$: 
+$$f_i(U)=g(U)$$
+\end{lemma}
+\begin{proof}
+Assume there is $i$ with $f_i(U)<g(U)$. W.L.O.G assume: $\{1...K\}=\arg\max_jf_j(U)$, by \Lemmaref{not equal implies can improve}: 
+\begin{itemize}
+    \item There is $U_{1}$ with $\left\Vert U_{1}-U\right\Vert\le\frac{\epsilon}{K}$, $f_{k}(U_1)<g(U)$ for all $k\ge K$, $f_{k}(U_1)=g(U)$ for all $k< K$. 
+    \item There is $U_{2}$ with $\left\Vert U_{2}-U_{1}\right\Vert\le\frac{\epsilon}{K}$, $f_{k}(U_2)<g(U)$ for all $k\ge K-1$, $f_{k}(U_2)=g(U)$ for all $k< K-1$.
+    \item ...
+    \item There is $U_{K}$ with $\left\Vert U_{K}-U_{K-1}\right\Vert\le\frac{\epsilon}{K}$, $f_{k}(U_K)<g(U)$ for all $k$. 
+\end{itemize}
+Finally, observe that $\left\Vert U-U_{K}\right\Vert\le{\epsilon}$ so we can find arbitrarily close $U_K$ such that $g(U_{K})<g(U)$ in contradiction to the fact that $U$ is local minimum, so we conclude that the claim holds.
+\end{proof}
+
+\begin{lemma} \label{local minimum orthogonal}
+Let $U$ a local minimum of $g$, then $U\in\mathcal{O}^{d\times r}$.
+\end{lemma}
+
+\begin{proof}
+We use the following equation (proof is in appendix \ref{technical proof}): Let $VDV^{T}$ an EVD decomposition of $UU^{T}$, then:
+\begin{align*}\label{}
+    f_i(U)=\left\Vert\x_{i}-UU^{T}\x_{i}\right\Vert^{2} - \left\Vert\x_{i}\right\Vert^{2}=\left\Vert\x_{i}\right\Vert^{2}\sum_{l=1}^{r}(D_{ll}^{2}-2D_{ll})V_{li}^{2}
+\end{align*}
+
+Assume that there is $\hat{l}\le r$ such that ${D}_{\hat{l},\hat{l}}\ne1$ assume W.L.O.G ${D}_{\hat{l},\hat{l}}<1$. $V$ is full rank, so there exist $i$ such that $V_{\hat{l}i}\ne0$  and thus $({D}_{\hat{l},\hat{l}}^2-2{D}_{\hat{l},\hat{l}})V_{\hat{l}i}^{2}<(({D}_{\hat{l},\hat{l}}+\epsilon)^2-2({D}_{\hat{l},\hat{l}}+\epsilon))V_{\hat{l}i}$ for arbitrary small epsilon (we increase $D_{ll}$ by increasing the $l$'th singular values of $U$). This means that there is an arbitrarily close $U{'}$ with $g(U^{'})=f_i(U)>f_i(U^{'})$ and by \Lemmaref{not equal implies can improve} there is also an arbitrarily close $U{''}$ with $g({U})=g(U^{'})>g(U^{''})$. So we conclude that $\forall l: \quad D_{ll}=1$ i.e. $U$ has orthonormal columns. 
+\end{proof}
+
+\begin{claim} \label{local minimum is global}
+Let $U$ a local minimum of $g$, then: 
+\begin{itemize}
+    \item $U$ is global minimum.
+    \item $g(U)=\frac{-r}{\sum_{i=1}^n \frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}$.
+\end{itemize}
+\end{claim}
+
+\begin{proof}
+
+Let $U$ a local minimum of $g$, then for all $i\in[n]$:
+$$
+g(U)=^1f_i(U)=^2-\x_i^TUU^T\x_i=-\left\Vert\x_{i}\right\Vert^{2}\left\Vert U_{i:}\right\Vert^2\Rightarrow - \frac{g(U)}{\left\Vert\x_{i}\right\Vert^{2}} = \left\Vert U_{i:}\right\Vert^2
+$$
+(1- by \Lemmaref{local minimum equals}, 2- by \Lemmaref{local minimum orthogonal}), so
+$$
+r=\left\Vert U\right\Vert^2_F=\sum_{i=1}^n \left\Vert U_{i:}\right\Vert^2=\sum_{i=1}^n - \frac{g(U)}{\left\Vert\x_{i}\right\Vert^{2}}\Rightarrow g(U)= \frac{-r}{\sum_{i=1}^n \frac{1}{\left\Vert\x_{i}\right\Vert^{2}}}
+$$
+Finally, since all local minima have the same value, they are all global minima.
+% Observe that for all $i,j$:
+% $$
+% -\left\Vert x_{i}\right\Vert^{2}\left\Vert U_i\right\Vert^2 \overset{1}{=}
+% f_i(U)\overset{2}{=}
+% f_j(U)\overset{3}{=}
+% -\left\Vert x_{j}\right\Vert^{2}\left\Vert U_j\right\Vert^2
+% $$
+% 1,3- Since $U\in\mathcal{O}^{n\times r}$ by \Lemmaref{local minimum orthogonal}. 2- by \Lemmaref{local minimum equals}.
+
+% Denote: $C:=-\left\Vert x_{i}\right\Vert^{2}\left\Vert U_i\right\Vert^2$, then for all $i\in[n]$:
+% $
+% - \frac{C}{\left\Vert x_{i}\right\Vert^{2}} = \left\Vert U_i\right\Vert^2
+% $, so:
+% $$
+% r=\left\Vert U\right\Vert^2_F=\sum_{i=1}^n \left\Vert U_i\right\Vert^2=\sum_{i=1}^n - \frac{C}{\left\Vert x_{i}\right\Vert^{2}}\Rightarrow -r = C \sum_{i=1}^n \frac{1}{\left\Vert x_{i}\right\Vert^{2}}\Rightarrow C= \frac{-r}{\sum_{i=1}^n \frac{1}{\left\Vert x_{i}\right\Vert^{2}}}
+% $$
+
+
+% Now, let $\hat{U}\in\mathcal{O}^{n\times r}$ such that: 
+% $
+% f_j(\hat{U})=-\left\Vert x_{j}\right\Vert^{2}\left\Vert \hat{U}_j\right\Vert^2<C=\frac{-r}{\sum_{i=1}^n \frac{1}{\left\Vert x_{i}\right\Vert^{2}}}
+% $ for some $j\in[n]$,
+% this means $\left\Vert\hat{U_j}\right\Vert^2>\left\Vert{U_j}\right\Vert^2$. Since $\sum_{i=1}^n \left\Vert \hat{U}_i\right\Vert^2=r=\sum_{i=1}^n \left\Vert U_i\right\Vert^2$, there exist $k$ such that:
+% $\left\Vert\hat{U_k}\right\Vert^2<\left\Vert{U_k}\right\Vert^2$ and thus: 
+% $$
+% f_k(\hat{U})=
+% - \left\Vert x_{k}\right\Vert^{2}\left\Vert \hat{U}_k\right\Vert^2 >
+% - \left\Vert x_{k}\right\Vert^{2}\left\Vert U_k\right\Vert^2=
+% \frac{-r}{\sum_{i=1}^n \frac{1}{\left\Vert x_{i}\right\Vert^{2}}}
+% $$
+% i.e. $g(U)< g(\hat{U})$ and thus $U$ is global minimum.
+\end{proof}
+
+\begin{claim} \label{has minimum}
+$g$ has global minimum.
+\end{claim}
+
+\begin{proof}
+    The set $D=\{U:\Vert U\Vert_F\le r\}\subset\mathbb{R}^{n\times r}$ is compact set, and $g:D\rightarrow\mathbb{R}$ is continuous function thus it has minimum. 
+\end{proof}
+
+\begin{corollary} \label{tagrget of original problem}
+The objective of the optimal solution of \probref{factorized_problem} is: $\frac{r}{\sum_{i=1}^n \frac{1}{\left\Vert\x_{i}\right\Vert^{2}}}$.
+\end{corollary}
+
+\begin{proof}
+    By \claimref{has minimum} $g$ has minimum, by \claimref{local minimum is global} the target of this minimum is: $\frac{-r}{\sum_{i=1}^n \frac{1}{\left\Vert\x_{i}\right\Vert^{2}}}$. By \Lemmaref{local minimum orthogonal} the optimal $U$ is in $\mathcal{O}^{n\times r}$ so we can use the equivalence between \probref{factorized_problem} and \probref{factorized_problem_restore}.
+    
+\end{proof}
+
+% \begin{lemma} \label{gradient of lagrangian is 0}
+% Let $U\in\mathbb{R}^{n\times r}$ such that
+% $$
+% \nabla\sum_{i=1}^n(1-\left\Vert U_{i}\right\Vert^2)=-\nabla\sum_{i=1}^n\sum_{j\ne i}^{n}\left|\left\langle U_{i},U_{j}\right\rangle \right|^{2}
+% $$
+% and $\forall i:\quad\left\Vert U_{i}\right\Vert ^{2}=\frac{r}{n}$, then $U$ is an optimal solution for our problem.
+% \end{lemma}
+% \begin{proof}
+% Observe that this is the gradient of the lagrangian of 
+% $$
+% \begin{array}{c}
+% \sum_{i=1}^{n}\sum_{j\ne i}^{n}\left|\left\langle U_{i},U_{j}\right\rangle \right|^{2}\\
+% s.t.\qquad\ensuremath{\left\Vert U_{i}\right\Vert ^{2}=1}
+% \end{array}
+% $$
+%  (for $\mu=1$) which is equal to 0. Thus if we normalize the rows of $U$ we get a local minima. By theorem 7 in \href{https://link.springer.com/article/10.1023/A:1021323312367}{\color{blue}this work} we know that any local minimizer of this problem ('Frame potential over the unit sphere') is globally optimal i.e. normalized tight frame. Finally by corollary \ref{tight frame is optimal} we get that $U$ is optimal for our problem.
+% \end{proof}
+
+
+% \begin{claim}
+% Any local minima of:
+% $
+% g(U)=\max_{i}\left\Vert e_i-UU^Te_i\right\Vert^2 
+% $
+% is global minima.
+% \end{claim}
+
+% \begin{proof}
+% By \Lemmaref{constraint is active}
+% there is no local minima where $\left\Vert U_{i}\right\Vert^{2}\ne\left\Vert U_{j}\right\Vert^{2}$ for some $i,j$. Thus it is enough to show that the problem:
+% $f\left(U,t\right)=t$ s.t.: $\left\Vert e_{i}-UU^{T}e_{i}\right\Vert ^{2}= t$ has no local minima.
+
+% By KKT the necessary conditions for local minima is:
+% \begin{enumerate}
+%     \item $\nabla\mathcal{L}(U,t,\lambda)=\nabla t+\sum_{i=1}^n\lambda_{i}(\left\Vert e_{i}-UU^{T}e_{i}\right\Vert ^{2}-t)=0$.
+%     % \item $\lambda\ge0$.
+%     % \item $\lambda_i(\left\Vert e_{i}-UU^{T}e_{i}\right\Vert ^{2}-t)=0$.
+%     \item $\left\Vert e_{i}-UU^{T}e_{i}\right\Vert ^{2}=t$.
+% \end{enumerate}
+
+% by condition 1 we have: $\nabla t\left(1-\sum_{i=1}^{n}\lambda_{i}\right)=0\Leftrightarrow1=\sum_{i=1}^{n}\lambda_{i}$ and:
+% \begin{align*}
+%     0=&\nabla\sum_{i=1}^n\lambda_{i}\left\Vert e_{i}-UU^{T}e_{i}\right\Vert ^{2}\\
+%     =&\nabla\sum_{i=1}^n\lambda_i(\left\Vert e_{i}\right\Vert-2e_{i}^TUU^Te_{i}+e_{i}^TUU^TUU^Te_{i})\\
+%     =&\nabla\sum_{i=1}^n\lambda_i(1-2\left\Vert U_{i}\right\Vert^2+\sum_{j=1}^{n}\left|\left\langle U_{i},U_{j}\right\rangle \right|^{2})\\
+%     =\footnotemark&\nabla\sum_{i=1}^n\frac{1}{n}(1-2\left\Vert U_{i}\right\Vert^2+\sum_{j=1}^{n}\left|\left\langle U_{i},U_{j}\right\rangle \right|^{2})\\
+%     =&\frac{1}{n}\nabla\sum_{i=1}^n(1-\left\Vert U_{i}\right\Vert^2)+\frac{1}{n}\nabla\sum_{i=1}^n\sum_{j\ne i}^{n}\left|\left\langle U_{i},U_{j}\right\rangle \right|^{2})\\
+% \end{align*}
+% It remains to show that $\left\Vert U_i\right\Vert^2=\left\Vert U_i\right\Vert^2$ for all $i,j$ and by \Lemmaref{gradient of lagrangian is 0} this is the global optimum. 
+% \footnotetext{I think that it can be shown that $\lambda_i=\frac{1}{n}$, didn't proved yet.}
+% \end{proof}
+
+% \begin{claim}
+% Let $U$ local minima of:
+% $
+% g(U)=\max_{i}\left\Vert e_i-UU^Te_i\right\Vert^2 
+% $
+% , then for all $i,j$:
+% $$
+% \left\Vert e_i-UU^Te_i\right\Vert^2=\left\Vert e_j-UU^Te_j\right\Vert^2
+% $$
+% \end{claim}
+% \begin{proof}
+% Let $U$ such that: $\left\Vert e_i-UU^Te_i\right\Vert^2>\left\Vert e_j-UU^Te_j\right\Vert^2$. Define: 
+% $E_j=\left(\begin{array}{ccc}
+% \vdots & \vdots\\
+% 0 & 0 & \cdots\\
+% \epsilon & 0 & \cdots\\
+% 0 & 0 & \cdots\\
+% \vdots & \vdots
+% \end{array}\right)\in\mathbb{R}^{n\times r}$ (i.e. $E_{ik}=\begin{cases}
+% \epsilon & i=j,k=1\\
+% 0 & else
+% \end{cases}$) and observe that: 
+% \end{proof}
+
+\subsection{SDR is tight}
+\begin{claim} \label{SDR is tight}
+SDR is tight.
+\end{claim}
+\begin{proof}
+    In the SDR problem we solve:
+    \begin{align*}
+\max_{\begin{array}{c}
+Tr\left(P\right)\le r\\
+0\preceq P\preceq I
+\end{array}}\min_{i}\x_{i}P\x_{i}=
+\max_{\begin{array}{c}
+Tr\left(P\right)\le r\\
+0\preceq P\preceq I
+\end{array}}\min_{i}\left\Vert \x_{i}\right\Vert^{2}\e_{i}P\e_{i}= 
+\max_{\begin{array}{c}
+Tr\left(P\right)\le r\\
+0\preceq P\preceq I
+\end{array}}\min_{i}\left\Vert \x_{i}\right\Vert^{2}P_{ii}
+    \end{align*}
+    
+Observe that if $P$ is optimal then:
+\begin{itemize}
+    \item $\forall i,j:\quad\left\Vert\x_{i}\right\Vert^{2}P_{ii}=\left\Vert\x_{j}\right\Vert^{2}P_{jj}$, so for all $i$: $P_{ii}=\frac{C}{\left\Vert\x_{i}\right\Vert^{2}}$ for some constant $C$.
+    \item $r=\sum_{i=1}^n P_{ii}=\sum_{i=1}^n\frac{C}{\left\Vert\x_{i}\right\Vert^{2}}$ so $C=\frac{r}{\sum_{i=1}^n\frac{1}{\left\Vert\x_{i}\right\Vert^{2}}}$.
+\end{itemize}
+i.e. the optimal solution is $\frac{r}{\sum_{i=1}^n\frac{1}{\left\Vert\x_{i}\right\Vert^{2}}}$, the same as the original problem (by \cororef{tagrget of original problem}) 
+
+\end{proof}
+It is worth mention that although the SDR is tight it does not promote low ranknes(!).
+
+\subsection{PCA is sub-optimal}
+
+Observe that in the PCA problem we sum over $i$ so we get:
+\begin{align*}
+    \sum_{i=1}^n\left\Vert\x_i-UU^T\x_i\right\Vert^2 - \left\Vert\x_{i}\right\Vert^2 =\sum_{i=1}^n-\left\Vert\x_{i}\right\Vert^2\left\Vert U_{i:}\right\Vert^2
+\end{align*}
+So we should assign norm of $1$ to the rows with the $r$ largest samples, i.e. we project to the subspace of the $r$ largest samples, so the value of the target for this $U$ is 0 since for $i=r+1...n$ we get: $x_iUU^Tx_i=0$. On the other hand, if we use the optimal $U$ we get the harmonic mean of the squared norms factorized by $\frac{r}{n}$ which is strictly greater then 0.
+
+\subsection{Beyond the standard basis}
+
+In this section we generalize the results from the standard basis. Assume $\x_i\perp \x_j$ for all $i\ne j$ (not necessarily the standard basis) and assume $n\le d$. 
+
+\subsubsection{Notation}
+\begin{itemize}
+    \item Let $V^T=\left(\frac{\x_1}{\Vert \x_1\Vert},...,\frac{\x_n}{\Vert \x_n\Vert}, \x_{n+1},...,\x_d\right)$ (where $\frac{\x_1}{\Vert \x_1\Vert},...,\x_d$ is orthonormal vectors).
+    \item Let $\x_i\in\{\x_i\}_{i=1}^n$, we define $\Tilde{\x}_i:=V\x_i$. 
+    \item Let  $U\in\mathbb{R}^{d\times r}$, we define $\hat{U}\in\mathbb{R}^{d\times r}$ by: $\hat{U}=VU,\quad V^T\hat{U}=U$.
+\end{itemize}
+
+\begin{observation}
+For all $i$:
+\begin{align*}
+    \norm{\x_i-UU^T\x_i}^2-\norm{\x_i}^2&=\norm{V^T\Tilde{\x}_i-V^T\hat{U}\hat{U}^TV\x_i}^2- \norm{V^T\Tilde{\x}_i}^2\\
+    =&\norm{V^T\Tilde{\x}_i-V^T\hat{U}\hat{U}\Tilde{\x_i}}^2-\norm{\Tilde{\x}_i}^2\\
+    =&\norm{\Tilde{\x}_i-\hat{U}\hat{U}\Tilde{\x_i}}^2- \norm{\Tilde{\x}_i}^2
+\end{align*}
+\end{observation}
+
+\begin{lemma}\label{no bad local minima general}
+Let $U$ such that $g(U)>\frac{-r}{\sum_{i=1}^n \frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}$, than $U$ is not local minimum.
+\end{lemma}
+\begin{proof}
+Let $U^{'}$ for which: 
+$$
+\max_{i\in[n]}\left\Vert \Tilde{\x}_i-\hat{U^{'}}\hat{U^{'}}^T\Tilde{\x}_i\right\Vert^2-\left\Vert\Tilde{\x}_i\right\Vert^2=\max_{i\in[n]}\left\Vert\x_i-U^{'}{U^{'}}^T{\x}_i\right\Vert^2-\left\Vert{\x}_i\right\Vert^2 >-r\left({\sum_{i=1}^n \frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}\right)^{-1}=-r\left({\sum_{i=1}^n \frac{1}{\left\Vert \Tilde{\x}_{i}\right\Vert^{2}}}\right)^{-1}
+$$ 
+Since the problem with $\{\Tilde{\x}\}_{i=1}^n$ has no bad local minima, for any $\delta>0$ there is $\hat{U}^{''}$ with $\left\Vert\hat{U}^{''}-\hat{U}^{'}\right\Vert\le\delta$ and 
+$$
+\max_{i\in[n]}\left\Vert \Tilde{\x}_i-\hat{U^{''}}\hat{U^{''}}^T\Tilde{\x}_i\right\Vert^2-\left\Vert\Tilde{\x}_i\right\Vert^2 < \max_{i\in[n]}\left\Vert \Tilde{\x}_i-\hat{U^{'}}\hat{U^{'}}^T\Tilde{\x}_i\right\Vert^2-\left\Vert\Tilde{\x}_i\right\Vert^2
+$$
+Thus we have: 
+$$
+\left\Vert{U^{''}}-{U^{'}}\right\Vert=\left\Vert V({U^{''}}-{U^{'}})\right\Vert=\left\Vert V{U^{''}}-V{U^{'}}\right\Vert=\left\Vert\hat{U^{''}}-\hat{U^{'}}\right\Vert\le\delta
+$$
+and:
+\begin{align*}
+\max_{i\in[n]}\left\Vert {\x}_i-{U^{''}}{U^{''}}^T{\x}_i\right\Vert^2-\left\Vert{\x}_i\right\Vert^2
+=\max_{i\in[n]}\left\Vert \Tilde{\x}_i-\hat{U^{''}}\hat{U^{''}}^T\Tilde{\x}_i\right\Vert^2-\left\Vert\Tilde{\x}_i\right\Vert^2\\
+< \max_{i\in[n]}\left\Vert \Tilde{\x}_i-\hat{U^{'}}\hat{U^{'}}^T\Tilde{\x}_i\right\Vert^2-\left\Vert\Tilde{\x}_i\right\Vert^2
+=\max_{i\in[n]}\left\Vert{\x}_i-{U^{'}}{U^{'}}^T{\x}_i\right\Vert^2-\left\Vert{\x}_i\right\Vert^2
+\end{align*}
+i.e. $U^{'}$ is not local minimum.
+
+\end{proof}
+
+\begin{claim}\label{general case claims}
+Let $U$ a local minimum of $g$ than:
+\begin{enumerate}
+    \item $g(U)=\frac{-r}{\sum_{i=1}^n \frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}$.
+    \item $U$ is global minimum.
+    \item $U\in\orth{d}{r}$.
+\end{enumerate}
+\end{claim}
+
+\begin{proof}
+By \Lemmaref{no bad local minima general} $g(U)\le\frac{-r}{\sum_{i=1}^n \frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}$. On the other hand, by \claimref{local minimum is global}:
+
+$$
+\min_{\begin{array}{c}
+U\in\mathbb{R}^{d\times r}
+\end{array}}\max_{i\in[n]}\left\Vert \Tilde{\x}_i-\hat{U}\hat{U}^T\Tilde{\x}_i\right\Vert^2-\left\Vert\Tilde{\x}_i\right\Vert^2=-r\left({\sum_{i=1}^n \frac{1}{\left\Vert \Tilde{\x}_{i}\right\Vert^{2}}}\right)^{-1}
+$$
+so
+$$
+\max_{i\in[n]}\left\Vert \x_i-U{U}^T{\x}_i\right\Vert^2-\left\Vert{\x}_i\right\Vert^2=\max_{i\in[n]}\left\Vert \Tilde{\x}_i-\hat{U}\hat{U}^T\Tilde{\x}_i\right\Vert^2-\left\Vert\Tilde{\x}_i\right\Vert^2\ge-r\left({\sum_{i=1}^n\frac{1}{\left\Vert\Tilde{\x}_{i}\right\Vert^{2}}}\right)^{-1}=-r\left({\sum_{i=1}^n \frac{1}{\left\Vert{\x}_{i}\right\Vert^{2}}}\right)^{-1}
+$$
+
+and we conclude 1. Since all local minima have the same target we conclude 2. Finally observe that by \Lemmaref{local minimum orthogonal} $\hat{U}\in\orth{d}{r}$, so also $U=V^T\hat{U}\in\orth{d}{r}$ and we conclude 3.
+
+\end{proof}
+
+% \begin{lemma}
+% The optimal target for \probref{factorized_problem_restore} is: $-r\left({\sum_{i=1}^n \frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}\right)^{-1}$
+% \end{lemma}
+% \begin{proof}
+% \begin{align*}
+% \min_{\begin{array}{c}
+% U\in\mathbb{R}^{d\times r}
+% \end{array}}\max_{i\in[n]}\left\Vert \x_{i}-UU^T\x_{i}\right\Vert^{2} - \left\Vert\x_{i}\right\Vert ^{2}
+% =&\min_{\begin{array}{c}
+% U\in\mathcal{O}^{d\times r}
+% \end{array}}\max_{i\in[n]}\left\Vert\x_{i}-UU^T\x_{i}\right\Vert^{2}- \left\Vert\x_{i}\right\Vert^{2}\\
+% =&\min_{\begin{array}{c}
+% W\in\mathcal{O}^{d\times r}
+% \end{array}}\max_{i\in[n]}\left\Vert V^T\Tilde{\x}_{i}-V^TWW^TV\x_i\right\Vert^2- \left\Vert \x_{i}\right\Vert ^{2}\\
+% =&\min_{\begin{array}{c}
+% W\in\mathcal{O}^{d\times r}
+% \end{array}}\max_{i\in[n]}\left\Vert \Tilde{\x}_{i}-WW^T\Tilde{\x}_i\right\Vert^2- \left\Vert \Tilde{\x}_{i}\right\Vert ^{2}\\
+% =& \min_{\begin{array}{c}
+% W\in\mathcal{O}^{d\times r}
+% \end{array}}\max_{i\in[n]}- \left\Vert\x_{i}\right\Vert^{2}\left\Vert W_{i:}\right\Vert^2\\
+% =^*& -r\left({\sum_{i=1}^n \frac{1}{\left\Vert\x_{i}\right\Vert^{2}}}\right)^{-1}
+% % =& \max_{i\in[n]}-\left\Vert x_{i}\right\Vert ^{2}\left\Vert U^{'}_i\right\Vert^2\\
+% % =& \max_{i\in[n]}-\left\Vert x_{i}\right\Vert ^{2}\left\Vert V_i\Tilde{U}\right\Vert^2
+% \end{align*}
+% ($^*$the last equality is true by \claimref{local minimum is global}). 
+% \end{proof}
+
+\begin{corollary}
+The minimum can be achieved by using the following procedure:
+\begin{enumerate}
+    \item Let $U^{'}\in\mathcal{O}^{n\times r}$ with $\left\Vert U^{'}_k\right\Vert^2=\frac{r}{\left\Vert \x_{k}\right\Vert^{2}}\left({\sum_{i=1}^n \frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}\right)^{-1}$ (exist by claims \ref{local minimum is global}, \ref{has minimum}).
+    \item append $d-n$ vectors of zeros to $U^{'}$.
+    \item 'rotate' by $V$ i.e.: ${\Tilde{U}}^T=[U^{'T},\textbf{0},...,\textbf{0}]V$.
+\end{enumerate}
+\end{corollary}
+
+\begin{proof}
+By this construction for all $i\in[n]$ we get: 
+$$
+\left\Vert\x_{i}-{\Tilde{U}}{\Tilde{U}}^T\x_{i}\right\Vert^{2} - \left\Vert\x_{i}\right\Vert^{2}=-\left\Vert \x_i\Tilde{U}\right\Vert^{2}=-\left\Vert\x_{i}\right\Vert^{2}\left\Vert V_{i:}\Tilde{U}\right\Vert^{2}=-\left\Vert\x_{i}\right\Vert^{2}\left\Vert {U^{'}_{i:}}\right\Vert^{2}=-r\left({\sum_{i=1}^n\frac{1}{\left\Vert\x_{i}\right\Vert^{2}}}\right)^{-1}
+$$
+\end{proof}
+
+\begin{corollary}\label{all equal general case}
+Let $U$ an optimal solution, than for all $i\in[n]$: $\left\Vert{\x_iU}\right\Vert^2=r\left({\sum_{i=1}^n\frac{1}{\left\Vert\x_{i}\right\Vert^{2}}}\right)^{-1}$.
+\end{corollary}
+
+\begin{proof}
+Observe that for all $i\in[n]$: $$\left\Vert{\x_iU}\right\Vert^2=^1\left\Vert\x_{i}-{{U}}{{U}}^T\x_{i}\right\Vert^{2} - \left\Vert\x_{i}\right\Vert^{2}=^2r\left({\sum_{i=1}^n\frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}\right)^{-1}$$
+
+(1- Since by \claimref{general case claims} $U\in\orth{d}{r}$, 2- Since by \claimref{general case claims} $U\in\orth{d}{r}$ this is the optimal target).
+\end{proof}
+
+\begin{claim}
+In the general orthogonal case SDR is tight.
+\end{claim}
+\begin{proof}
+
+\begin{align*}
+    \max_{\begin{array}{c}
+    Tr\left(P\right)\le r\\
+    0\preceq P\preceq I
+    \end{array}}\min_{i\in[n]}\x_{i}^TP\x_{i}
+    =&\max_{\begin{array}{c}
+    Tr\left(P\right)\le r\\
+    0\preceq P\preceq I
+    \end{array}}\min_{i\in[n]}\left\Vert \x_{i}\right\Vert^{2}\e_{i}^TVPV^T\e_{i}\\
+    =& \max_{\begin{array}{c}
+    Tr\left(VPV^T\right)\le r\\
+    0\preceq VPV^T\preceq I
+    \end{array}}\min_{i\in[n]}\left\Vert \x_{i}\right\Vert^{2}(VPV^T)_{ii}\\
+    =^*&r\left({\sum_{i=1}^n \frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}\right)^{-1}
+\end{align*}
+    
+($^*$the last equality is true by \claimref{SDR is tight}) i.e. the optimal solution is $\frac{r}{\sum_{i=1}^n\frac{1}{\left\Vert \x_{i}\right\Vert^{2}}}$, the same as the original problem and strictly greater then the PCA solution (which is 0).
+\end{proof}
+
+\subsection{Tight frame}
+
+\begin{definition}.
+\begin{itemize}
+    \item Let $\{u_i\}_{i=1}^n\subset\mathbb{R}^r$. If $span(\{u_i\}_{i=1}^n)=\mathbb{R}^r$ then $\{u_i\}_{i=1}^n$ is frame for $\mathbb{R}^r$.
+    \item A frame $\{u_i\}_{i=1}^n$ is tight with frame bound A if and only if $\forall v\in\mathbb{R}^n$:
+    $$v=\frac{1}{A}\sum_{i=1}^n\left<v,u_i\right>u_i$$
+    \item We call $\{u_i\}_{i=1}^n$ 'Normalized Tight Frame' if $\{u_i\}_{i=1}^n$ is tight frame and $\Vert u_i\Vert=1$ for all $i$.
+\end{itemize}
+\end{definition}
+
+\begin{lemma}\label{standard basis enough}
+A frame $\{u_i\}_{i=1}^n\subset\mathbb{R}^r$ is tight with frame bound A if and only if $\forall e_i$ in the standard basis:
+    $$e_i=\frac{1}{A}\sum_{i=1}^n\left<e_i,u_i\right>u_i$$
+\end{lemma}
+
+\begin{proof}
+Observe that if $\;\forall e_{i}\in\left\{ e_{i}\right\} _{i=1}^{r}$ we have: $e_{i}=\frac{1}{A}\sum_{j=1}^{n}\left\langle e_{i},u_{j}\right\rangle u_{j}$ than we get for all $v\in\mathbb{R}^{r}$:
+\begin{align*}
+    v=	\sum_{j=1}^{r}v_{j}e_{j}
+=	\sum_{j=1}^{r}v_{j}\frac{1}{A}\sum_{i=1}^{n}\left\langle e_{j},u_{i}\right\rangle u_{i}
+=	\frac{1}{A}\sum_{i=1}^{n}\left\langle \sum_{j=1}^{r}v_{j}e_{j},u_{i}\right\rangle u_{i}
+=	\frac{1}{A}\sum_{i=1}^{n}\left\langle v,u_{i}\right\rangle u_{i}
+\end{align*}
+\end{proof}
+
+\begin{claim} \label{tight frame iff scaled orthonormal}
+Let $U^T=(u_1,...,u_n)\in\mathbb{R}^{r\times n}$. $\{u_i\}_{i=1}^n$ is a tight frame with frame bound $A$ iff $U$ has orthogonal columns with norm $\sqrt{A}$. 
+\end{claim}
+
+\begin{proof}
+
+
+Consider equality 1 below: 
+\begin{align*}
+    U^{T}U=\left(u_{1},...,u_{n}\right)\left(u_{1},...,u_{n}\right)^{T}=\left(\begin{array}{c}
+    \\
+    \sum_{j=1}^{n}u_{j}^{1}u_{j},\\
+    \\
+    \end{array}...,\begin{array}{c}
+    \\
+    \sum_{j=1}^{n}u_{j}^{r}u_{j}\\
+    \\
+    \end{array}\right)=^1\left(\begin{array}{c}
+    \\
+    Ae_{1}\\
+    \\
+    \end{array}...\begin{array}{c}
+    \\
+    Ae_{r}\\
+    \\
+    \end{array}\right)=AI
+\end{align*}
+Observe that $UU^T=AI$ iff $U$ has orthogonal columns with norm $\sqrt A$. Equality 1 also holds iff $Ae_{i}=\sum_{j=1}^{n}u_{j}^{i}u_{j}=\sum_{j=1}^{n}\left\langle e_{i},u_{j}\right\rangle u_{j}$ which holds iff $\{u_i\}_{i=1}^n$ is a tight frame with frame bound $A$ (by \Lemmaref{standard basis enough}), so we conclude that the conditions are equivalent.
+\end{proof}
+
+\begin{claim} \label{tight frame iff orthonormal}
+Let $U\in\mathbb{R}^{d\times r}$, the following conditions are equal:
+\begin{itemize}
+    \item $U^T$ is an optimal solution for \probref{factorized_problem_restore}.
+    \item $U^T$ is tight frame with $\left\Vert U\right\Vert_F^2=r$ and for all k: $\left\Vert x_k^TU\right\Vert^2=r\left({\sum_{i=1}^n \frac{1}{\left\Vert x_{i}\right\Vert^{2}}}\right)^{-1}$
+\end{itemize}
+
+\end{claim}
+\begin{proof}
+
+Let $U\in\mathbb{R}^{d\times r}$ an optimal solution for \probref{factorized_problem_restore}, by \Lemmaref{local minimum orthogonal} the columns of $U$ are orthonormal, so by \cororef{all equal general case} $U$ is tight frame and $\left\Vert U\right\Vert_F^2=r\cdot1=r$.
+On the other hand, let $U^T$ a tight frame as above, by \claimref{tight frame iff scaled orthonormal} the columns of $U$ are orthogonal and have the same norm, since $\left\Vert U\right\Vert_F^2=r$ the columns has unit norms, i.e. the columns are orthonormal, so for all $i\in[n]$:
+\begin{align*}
+    \left\Vert x_i-UU^Tx_i\right\Vert^2- \left\Vert x_{i}\right\Vert ^{2}
+    =-x_{i}^TUU^Tx_{i}
+    =-\Tilde{x}_{i}^TVUU^TV^T\Tilde{x}_{i}
+    =-r\left({\sum_{i=1}^n \frac{1}{\left\Vert x_{i}\right\Vert^{2}}}\right)^{-1}
+\end{align*}
+i.e. $\min_i\left\Vert x_i-UU^Tx_i\right\Vert^2-\left\Vert x_{i}\right\Vert^{2}=-r\left({\sum_{i=1}^n \frac{1}{\left\Vert x_{i}\right\Vert^{2}}}\right)^{-1}$ which is the optimal target.
+\end{proof}
+
+\begin{corollary}
+If $\forall i:\; x_i=e_i$, then \probref{factorized_problem} is reduced to the problem of finding 'normalized tight frame'.
+\end{corollary}
+
+% \begin{claim}
+% Let $U^T\in\mathbb{R}^{r\times n}$ an 'A normalized tight frame' of $\;\mathbb{R}^{r}$, then 
+% $$
+% \max_i\left\Vert e_i-\sqrt{\frac{r}{n}}U\sqrt{\frac{r}{n}}U^Te_i\right\Vert^2=1-\frac{r}{n}
+% $$
+% \end{claim}
+% \begin{proof}
+
+% Let $\left\{ u_{i}\right\} _{i=1}^{n}\subset\mathbb{R}^{r}$ , denote: $U^T=\left(u_{1},...,u_{n}\right)$. $U^T$ is an 'A normalized tight frame' iff: 
+% $$\forall v\in\mathbb{R}^{r}:\quad v=\frac{1}{A}\sum_{i=1}^{n}\left\langle v,u_{i}\right\rangle u_{i}\qquad and \qquad\forall i:\quad\left\Vert u_{i}\right\Vert =1
+% $$
+
+% % Observe that if $\;\forall e_{i}\in\left\{ e_{i}\right\} _{i=1}^{r}$ we have: $e_{i}=\frac{1}{A}\sum_{j=1}^{n}\left\langle e_{i},u_{j}\right\rangle u_{j}$ then we get for all $v\in\mathbb{R}^{r}$:
+% % \begin{align*}
+% %     v=	\sum_{j=1}^{r}v_{j}e_{j}
+% % =	\sum_{j=1}^{r}v_{j}\frac{1}{A}\sum_{i=1}^{n}\left\langle e_{j},u_{i}\right\rangle u_{i}
+% % =	\frac{1}{A}\sum_{i=1}^{n}\left\langle \sum_{j=1}^{r}v_{j}e_{j},u_{i}\right\rangle u_{i}
+% % =	\frac{1}{A}\sum_{i=1}^{n}\left\langle v,u_{i}\right\rangle u_{i}
+% % \end{align*}
+% % Thus it is sufficient to check the condition only with the standard basis. 
+% Now, if the standard basis satisfy the condition, i.e. $e_{i}=\frac{1}{A}\sum_{j=1}^{n}\left\langle e_{i},u_{j}\right\rangle u_{j}=\frac{1}{A}\sum_{j=1}^{n}u_{j}^{i}u_{j}$, we get:
+
+% \begin{align*}
+%     U^{T}U=\left(u_{1},...,u_{n}\right)\left(u_{1},...,u_{n}\right)^{T}=\left(\begin{array}{c}
+% \\
+% \sum_{j=1}^{n}u_{j}^{1}u_{j},\\
+% \\
+% \end{array}...,\begin{array}{c}
+% \\
+% \sum_{j=1}^{n}u_{j}^{r}u_{j}\\
+% \\
+% \end{array}\right)=\left(\begin{array}{c}
+% \\
+% Ae_{1}\\
+% \\
+% \end{array}...\begin{array}{c}
+% \\
+% Ae_{r}\\
+% \\
+% \end{array}\right)=AI
+% \end{align*}
+% So
+% \begin{enumerate}
+%     \item The columns of $U^{T}$ are orthogonal to each other. \label{orthogonals}
+%     \item The columns of $U$ has the same norm $\sqrt{A}$ (the diagonal of $U^{T}U$). \label{column norm equals}
+% \end{enumerate}
+
+% Observe that by \ref{column norm equals} we have: $n=\sum_{i=1}^n\left\Vert u_{i}\right\Vert _{2}^{2}=\left\Vert U\right\Vert _{F}^{2}=\sum_{i=1}^r\left\Vert [U^T]_i\right\Vert _{2}^{2}=\sum_{i=1}^rA\Longrightarrow A=\frac{n}{r}$, so by \ref{orthogonals} the matrix $\sqrt{\frac{r}{n}}U$ has orthonormal columns, and since $u_i$ has unit norm, the value is:
+% $$
+% \max_i\left\Vert e_i-\sqrt{\frac{r}{n}}U\sqrt{\frac{r}{n}}U^Te_i\right\Vert^2=1-\min_{i}\left\Vert \sqrt{\frac{r}{n}}u_i\right\Vert^2=1-\frac{r}{n}
+% $$
+% \end{proof}
+
+% \begin{corollary}\label{tight frame is optimal}\label{tight frame is optimal}
+% Let $\hat{U}^T\in\mathbb{R}^{r\times n}$ an 'A normalized tight frame' of $\mathbb{R}^{r}$, then: 
+% $$
+% \sqrt{\frac{r}{n}}\hat{U}=\arg\min_{\begin{array}{c}
+% U\in\mathbb{R}^{n\times r}
+% \end{array}}\max_{i}\left\Vert e_{i}-UU^Te_{i}\right\Vert ^{2}
+% $$
+% \end{corollary}
+
+% \begin{proof}
+%     Let $\mathcal{O}^{n\times r}\subset \mathbb{R}^{n\times r}$ be the set of matrices with orthonormal columns (we proved that the optimal solution is in this set). Observe that any $U\in\mathcal{O}^{n\times r}$ has $\sum_{i=1}^n \left\Vert U_i\right\Vert^2=\left\Vert U\right\Vert_F^2=\sum_{j=1}^r \left\Vert U_{:j}\right\Vert^2=r$. Thus, for any matrix $U\in\mathcal{O}^{n\times r}$ $\min_i\left\Vert U_i\right\Vert^2\le\frac{\sum_{i=1}^n \left\Vert U_i\right\Vert^2}{n}=\frac{r}{n}$ (since $min \le mean$) so:
+%     $$
+%     \min_{\begin{array}{c}
+% U\in\mathbb{R}^{n\times r}
+% \end{array}}\max_{i}\left\Vert e_{i}-UU^Te_{i}\right\Vert ^{2}=\min_{\begin{array}{c}
+% U\in\mathcal{O}^{n\times r}
+% \end{array}}1-\min_{i}\left\Vert U_i\right\Vert^2\ge1-\frac{r}{n}=1-\min_{i}\left\Vert \hat{U}_i\right\Vert^2
+%     $$
+% \end{proof}
+
+\begin{claim}
+Denote $H=n\left(\sum_{i=1}^{n}\frac{1}{\left\Vert x_{i}\right\Vert ^{2}}\right)^{-1}$ (the harmonic mean of the samples), then:
+\begin{align}
+    \min_{\begin{array}{c}
+    \forall k:\;\left\Vert x_{k}U\right\Vert ^{2}=\frac{r}{n}H\\
+    \left\Vert U\right\Vert _{F}^{2}=r
+    \end{array}}\sum_{i=1}^{n}\sum_{j=1}^{n}\left\langle U_{i},U_{j}\right\rangle ^{2}
+\end{align}
+is a tight frame.
+\end{claim}
+
+\begin{proof}
+Denote $\lambda_i$ the $i$'th eigenvalue of $U^TU$, then: 
+$$
+\sum_{j=1}^{n}\left\langle U_{i},U_{j}\right\rangle ^{2}=Tr(U^TUU^TU)=\sum_{i=1}^r\lambda_i^2
+$$
+Now, consider the minimization of $\sum_{i=1}^r\lambda_i^2$ s.t. $\sum_{i=1}^r\lambda_i=\left\Vert U\right\Vert _{F}^{2}=r$. A necessary condition for optimality is:
+$$
+\nabla_\lambda\mathcal{L}=\nabla_\lambda \sum_{i=1}^r\lambda_i^2+\mu(\sum_{i=1}^r\lambda_i-r)=0\Leftrightarrow\forall i:\;2\lambda_i=\mu\Leftrightarrow\forall ij:\;\lambda_i=\lambda_j\Leftrightarrow\forall i:\;\lambda_i=1
+$$
+So $U$ has orthonormal columns, and by \claimref{tight frame iff orthonormal} it is also a tight frame.
+\end{proof}
+
+\subsection{Appendix} \label{technical proof}
+\begin{theorem}
+Let $U\in\mathbb{R}^{n\times r}$
+\begin{align*}
+    \left\Vert e_{i}-U^{'}U^{'T}e_{i}\right\Vert ^{2}-\left\Vert e_{i}-UU^{T}e_{i}\right\Vert ^{2}= \sin\left(2\theta\right)e_{i}^{T}UU^{T}e_{j}^{T}+\sin\left(\theta\right)^{2}\left(\left\Vert e_{j}-UU^{T}e_{j}\right\Vert ^{2}-\left\Vert e_{i}-UU^{T}e_{i}\right\Vert ^{2}\right)
+\end{align*}
+\end{theorem}
+\begin{proof}
+Let $VDV^{T}$ an EVD decomposition of $UU^{T}$, and denote $\hat{D}:=D^{2}-2D$ then:
+
+\begin{align*}\label{}
+    \left\Vert x_{i}-UU^{T}x_{i}\right\Vert ^{2}=&	\left\Vert x_{i}\right\Vert ^{2}-2x_{i}^{T}UU^{T}x_{i}+x_{i}^{T}UU^{T}UU^{T}x_{i}\\
+=&	\left\Vert x_{i}\right\Vert ^{2}-2x_{i}^{T}VDV^{T}x_{i}+x_{i}^{T}VD^{2}V^{T}x_{i}\\
+=&	\left\Vert x_{i}\right\Vert ^{2}+x_{i}^{T}V\left(D^{2}-2D\right)V^{T}x_{i}\\
+=&	\left\Vert x_{i}\right\Vert ^{2}+\sum_{l=1}^{r}\hat{D}_{ll}\left[V^{T}x_{i}\right]_{l}^{2}\\
+=&  \left\Vert x_{i}\right\Vert ^{2}\left(1+\sum_{l=1}^{r}\hat{D}_{ll}V_{li}^{2}\right)
+\end{align*}
+and since $RVDV^{T}R^T$ is the EVD decomposition of $U^{'}U^{'T}$, we also have: 
+\begin{align*}
+    \left\Vert x_{i}-U^{'}U^{'T}x_{i}\right\Vert^{2}
+    =& \left\Vert x_{i}\right\Vert^{2}+\sum_{l=1}^{r}\hat{D}_{ll}\left[V^{T}R^Tx_{i}\right]_{l}^{2}\\
+    =& \left\Vert x_{i}\right\Vert^{2}\left(1+\sum_{l=1}^{r}\hat{D}_{ll}\left[V^{T}R^Te_{i}\right]_{l}^{2}\right)\\
+    =& \left\Vert x_{i}\right\Vert^{2}\left(1+\sum_{l=1}^{r}\hat{D}_{ll}\left[V^{T}\left(\cos\left(\theta\right)e_{i}+\sin\left(\theta\right)e_{j}\right)\right]_{l}^{2}\right)\\
+    =& \left\Vert x_{i}\right\Vert^{2}\left(1+\sum_{l=1}^{r}\hat{D}_{ll}\left(\cos\left(\theta\right)^2V_{li}^{2}+2\cos\left(\theta\right)V_{li}\sin\left(\theta\right)V_{lj}+\sin\left(\theta\right)^{2}V_{lj}^{2}\right)\right)
+\end{align*}
+So:
+\begin{align*}
+    \left\Vert e_{i}-U^{'}U^{'T}e_{i}\right\Vert ^{2}-\left\Vert e_{i}-UU^{T}e_{i}\right\Vert^{2}=&\sum_{l=1}^{r}\hat{D}_{ll}\left(2\cos\left(\theta\right)V_{li}\sin\left(\theta\right)V_{lj}+\sin^{2}\left(\theta\right)V_{lj}^{2}-\left(1-\cos^{2}\left(\theta\right)\right)V_{li}^{2}\right)\\
+    =& \sum_{l=1}^{r}\hat{D}_{ll}\left(2\cos\left(\theta\right)V_{li}\sin\left(\theta\right)V_{lj}+\sin^{2}\left(\theta\right)V_{lj}^{2}-\sin^{2}\left(\theta\right)V_{li}^{2}\right)\\
+    =& \sum_{l=1}^{r}\hat{D}_{ll}\left(2\cos\left(\theta\right)V_{li}\sin\left(\theta\right)V_{lj}+\sin^{2}\left(\theta\right)\left(V_{lj}^{2}-V_{li}^{2}\right)\right)\\
+    =& 2\cos\left(\theta\right)\sin\left(\theta\right)\sum_{l=1}^{r}\hat{D}_{ll}V_{li}V_{lj}+\sin^{2}\left(\theta\right)\sum_{l=1}^{r}\hat{D}_{ll}\left(V_{lj}^{2}-V_{li}^{2}\right)\\
+    =& \sin\left(2\theta\right)e_{i}^{T}UU^{T}e_{j}^{T}+\sin^{2}\left(\theta\right)\left(\left\Vert e_{j}-UU^{T}e_{j}\right\Vert ^{2}-\left\Vert e_{i}-UU^{T}e_{i}\right\Vert ^{2}\right)
+\end{align*}
+\end{proof}
+
+
+\end{document}
